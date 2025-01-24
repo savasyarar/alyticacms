@@ -1,0 +1,1 @@
+export type Role = "administrator" | "contentManager" | "editor";

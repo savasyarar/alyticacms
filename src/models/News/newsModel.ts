@@ -1,4 +1,4 @@
-import {Schema, model, Types, Document } from "mongoose";
+import { Schema, model } from "mongoose";
 
 // @ import interfaces
 import { INews } from "../../interfaces/INews";
@@ -15,7 +15,9 @@ const newsSchema = new Schema<INews>({
     },
     title: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
+        maxlength: 200
     },
     coverPicture: {
         type: String,
@@ -24,6 +26,15 @@ const newsSchema = new Schema<INews>({
     content: {
         type: String,
         required: true
+    },
+    category: {
+        type: String,
+        required: true,
+        enum: ["default"]
+    },
+    published: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true

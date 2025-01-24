@@ -7,6 +7,8 @@ export interface INews extends Document {
     title: string;
     coverPicture: string;
     content: string;
+    category: string;
+    published: Boolean;
     createdAt: Date;
     updatedAt: Date;
 }

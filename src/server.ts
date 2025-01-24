@@ -21,6 +21,11 @@ let corsOptions = {
 app.use(cors(corsOptions));
 
 // @ import routes
+import userRoutes from "./routes/User/userRoutes";
+
+
+// use Routes
+app.use('/api', userRoutes);
 
 // server starts
 app.listen(PORT, () => {
