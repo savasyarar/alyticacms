@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken";
 import userModel from "../../models/User/userModel";
 
 // @ import utilis
-import { sendErrorMessages } from "../../utilis/basics";
+import {checkValidUser, sendErrorMessages} from "../../utilis/basics";
 
 // Token erstellen
 const createToken = (id: string): string => {
@@ -137,10 +137,6 @@ export const handleCreateUser = async(req: Request, res: Response): Promise<void
             role: value.role
         });
 
-        if(!createUser){
-            sendErrorMessages(res, 400, 'Benutzer konnte nicht angelegt werden');
-            return;
-        }
 
         res.status(201).json({
             message: 'Der Benutzer wurde erfolgreich angelegt.'
@@ -170,10 +166,47 @@ export const handleVerifyUser = async(req: Request, res: Response): Promise<void
             sendErrorMessages(res, 404, 'Benutzer konnte nicht gefunden werden');
             return;
         }
-
         res.status(200).json({
             user: findUser
         });
+    } catch(error){
+        console.error('Fehler: ' + error);
+        sendErrorMessages(res, 500, 'Interner Serverfehler');
+    }
+}
+
+// Benutzer löschen
+export const handleDeleteUser = async(req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = req.id;
+        await checkValidUser(userId!);
+
+        // Benutzer ID
+        const deleteUserId = req.params.id;
+
+        if(!deleteUserId){
+            sendErrorMessages(res, 400, 'Die Benutzer-ID ist erforderlich.');
+            return;
+        }
+
+        if(userId === deleteUserId){
+            sendErrorMessages(res, 400, 'Du kannst deinen eigenen Benutzeraccount nicht löschen');
+            return;
+        }
+
+        const deleteUser = await userModel.findOneAndDelete({
+            id: deleteUserId
+        });
+
+        if(!deleteUser){
+            sendErrorMessages(res, 404, 'Der Benutzer konnte nicht gefunden werden.');
+            return;
+        }
+
+        res.status(200).json({
+            message: 'Der Benutzer wurde erfolgreich gelöscht.'
+        });
+
     } catch(error){
         console.error('Fehler: ' + error);
         sendErrorMessages(res, 500, 'Interner Serverfehler');
