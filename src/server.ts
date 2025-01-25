@@ -24,11 +24,13 @@ app.use(cors(corsOptions));
 // @ import routes
 import userRoutes from "./routes/User/userRoutes";
 import newsRoutes from "./routes/News/newsRoutes";
+import newsletterRoutes from "./routes/Newsletter/newsletterRoutes";
 
 
 // use Routes
 app.use('/api', userRoutes);
 app.use('/api', newsRoutes);
+app.use('/api', newsletterRoutes);
 
 // server starts
 app.listen(PORT, () => {

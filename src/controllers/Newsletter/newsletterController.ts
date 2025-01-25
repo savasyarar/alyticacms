@@ -9,14 +9,13 @@ import newsletterModel from "../../models/Newsletter/newsletterModel";
 // @ validation
 import {newsletterValidation} from "../../utilis/validation/newsletterValidation";
 import {sendErrorMessages} from "../../utilis/basics";
-import {newsValidation} from "../../utilis/validation/newsValidation";
 
 // Trage dich in den Newsletter ein // E-Mail bestätigung fehlt
 export const handleSignNewsletter = async(req: Request, res: Response): Promise<void> => {
 
     try {
 
-        const { error, value } = newsValidation.validate(req.body, {
+        const { error, value } = newsletterValidation.validate(req.body, {
             abortEarly: false
         });
 

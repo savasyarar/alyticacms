@@ -24,9 +24,11 @@ app.use((0, cors_1.default)(corsOptions));
 // @ import routes
 const userRoutes_1 = __importDefault(require("./routes/User/userRoutes"));
 const newsRoutes_1 = __importDefault(require("./routes/News/newsRoutes"));
+const newsletterRoutes_1 = __importDefault(require("./routes/Newsletter/newsletterRoutes"));
 // use Routes
 app.use('/api', userRoutes_1.default);
 app.use('/api', newsRoutes_1.default);
+app.use('/api', newsletterRoutes_1.default);
 // server starts
 app.listen(PORT, () => {
     mongoose_1.default.connect(process.env.MONGO_URI).then(() => {
