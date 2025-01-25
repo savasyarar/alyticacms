@@ -9,15 +9,23 @@ import { upload } from "../../middlewares/upload";
 import {
     handleCreateNews,
     handleDeleteNews,
-    handleEditNews
+    handleEditNews,
+    handleGetAllNews,
+    handleGetNewsById,
+    handleGetLastFiveNews
 } from "../../controllers/News/newsController";
 
 
 // Post
-newsRoutes.post('/news', auth, upload.array('files', 15), handleCreateNews);
+newsRoutes.post('/news', auth, upload.single('coverPicture'), handleCreateNews);
 
 // Put
-newsRoutes.put('/news/:id', auth, upload.array('files', 15), handleEditNews);
+newsRoutes.put('/news/:id', auth, upload.single('coverPicture'), handleEditNews);
+
+// Get
+newsRoutes.get('/news/:id', handleGetNewsById); // Nachrichten nach ID anzeigen
+newsRoutes.get('/news/all/view', handleGetAllNews); // Alle Nachrichten anzeigen
+newsRoutes.get('/news/last/view', handleGetLastFiveNews); // Letzten 5 Nachrichten anzeigen
 
 // Delete
 newsRoutes.delete('/news/:id', auth, handleDeleteNews);

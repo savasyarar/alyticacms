@@ -26,18 +26,23 @@ const createToken = (id: string): string => {
 // Benutzerlogin
 export const handleUserLogin = async(req: Request, res: Response): Promise<void> => {
     try {
-        const { error, value } = userValidation.validate(req.body, {
-            abortEarly: false
-        });
 
-        if(error){
-            sendErrorMessages(res, 400, 'Validierungsfehler', error.details.map((err) => err.message));
+        const {
+            email,
+            password
+        } = req.body;
+
+        if(!email || !password){
+            sendErrorMessages(res, 400, 'Bitte geben Sie Ihre E-Mail und Passwort ein.');
             return;
         }
 
+        const validEmail = email.trim();
+        const validPassword = password.trim();
+
         // Prüfen ob Benutzeremail existiert
         const findUser = await userModel.findOne({
-            email: value.email
+            email: validEmail
         });
 
         if(!findUser){
@@ -46,7 +51,7 @@ export const handleUserLogin = async(req: Request, res: Response): Promise<void>
         }
 
         // Passwortcheck
-        const comparePassword = await bcrypt.compare(value.password, findUser.password);
+        const comparePassword = await bcrypt.compare(validPassword, findUser.password);
 
         if(!comparePassword){
             sendErrorMessages(res, 400, 'Ihre E-Mail und Passwort stimmen nicht überein.');
@@ -76,7 +81,6 @@ export const handleUserLogin = async(req: Request, res: Response): Promise<void>
 
 // Benutzer anlegen
 export const handleCreateUser = async(req: Request, res: Response): Promise<void> => {
-
     try {
 
         const user = req.id;
@@ -148,6 +152,57 @@ export const handleCreateUser = async(req: Request, res: Response): Promise<void
     }
 }
 
+// Benutzer bearbeiten
+export const handleEditUser = async(req: Request, res: Response): Promise<void> => {
+    try {
+
+        const userId = req.id;
+        const user = await checkValidUser(userId!);
+
+        // ID vom Benutzer welches editiert werden soll
+        const editUserId = req.params.id;
+
+        if(!editUserId){
+            sendErrorMessages(res, 400, 'Benutzer ist nicht valide');
+            return;
+        }
+
+        if(user.role !== 'administrator'){
+            sendErrorMessages(res, 403, 'Sie dürfen diesen Benutzer nicht bearbeiten');
+            return;
+        }
+
+        // Validierung
+        const { error, value } = userValidation.validate(req.body, {
+            abortEarly: false
+        });
+
+        if(error){
+            sendErrorMessages(res, 400, 'Validierungsfehler', error.details.map((err) => err.message));
+            return;
+        }
+
+        const updateUser = await userModel.findOneAndUpdate(
+            { id: editUserId },
+            { ...value },
+            { new: true}
+        );
+
+        if(!updateUser){
+            sendErrorMessages(res, 404, 'Benutzer konnte nicht gefunden und aktualisiert werden');
+            return;
+        }
+
+        res.status(200).json({
+            message: 'Benutzer wurde erfolgreich aktualisiert.'
+        });
+
+    } catch(error){
+        console.error('Fehler: ' + error);
+        sendErrorMessages(res, 500, 'Interner Serverfehler');
+    }
+}
+
 // Benutzerverifizierung
 export const handleVerifyUser = async(req: Request, res: Response): Promise<void> => {
     try {
@@ -205,6 +260,117 @@ export const handleDeleteUser = async(req: Request, res: Response): Promise<void
 
         res.status(200).json({
             message: 'Der Benutzer wurde erfolgreich gelöscht.'
+        });
+
+    } catch(error){
+        console.error('Fehler: ' + error);
+        sendErrorMessages(res, 500, 'Interner Serverfehler');
+    }
+}
+
+// Benutzer nach ID anzeigen
+export const handleGetAllUser = async(req: Request, res: Response): Promise<void> => {
+    try {
+        const user = req.id;
+
+        await checkValidUser(user!);
+
+        const getUserId = req.params.id;
+
+        if(!getUserId){
+            sendErrorMessages(res, 400, 'Benutzer ist nicht valide');
+            return;
+        }
+
+        const findUser = await userModel.findOne({
+            id: getUserId
+        }).select("id role firstName lastName email");
+
+        if(!findUser){
+            sendErrorMessages(res, 404, 'Benutzer konnte nicht gefunden werden');
+            return;
+        }
+        res.status(200).json({
+            user: findUser
+        });
+    } catch(error){
+        console.error('Fehler: ' + error);
+        sendErrorMessages(res, 500, 'Interner Serverfehler');
+    }
+}
+
+// Alle Benutzer anzeigen
+export const handleGetUserById = async(req: Request, res: Response): Promise<void> => {
+    try {
+        const user = req.id;
+
+        await checkValidUser(user!);
+
+        const getUserId = req.params.id;
+
+        if(!getUserId){
+            sendErrorMessages(res, 400, 'Benutzer ist nicht valide');
+            return;
+        }
+
+        const findUser = await userModel.find().select("id role firstName lastName email");
+
+        if(findUser.length === 0){
+            sendErrorMessages(res, 404, 'Es konnten keine Benutzer gefunden werden');
+            return;
+        }
+        res.status(200).json({
+            user: findUser
+        });
+
+    } catch(error){
+        console.error('Fehler: ' + error);
+        sendErrorMessages(res, 500, 'Interner Serverfehler');
+    }
+}
+
+// Erste Registrierung
+export const handleRegisterFirstUser = async(req: Request, res: Response): Promise<void> => {
+    try {
+        // Fehlermeldung
+        const { error, value} = userValidation.validate(req.body, {
+            abortEarly: false
+        });
+
+        if(error){
+            sendErrorMessages(res, 400, 'Ihre Eingabe ist nicht valide', error.details.map((err) => err.message));
+            return;
+        }
+
+        // Prüfe ob E-Mail existiert
+        const findUser = await userModel.findOne({
+            email: value.email
+        });
+
+        if(findUser){
+            sendErrorMessages(res, 400, 'Dieser Benutzer existiert bereits.');
+            return;
+        }
+
+        // Passwort hashen
+        const hashedPassword = await bcrypt.hash(value.password, 10);
+
+        // Generiere eine ID
+        const userId = uuidv4();
+
+        // Alles Ok
+        const createUser = await userModel.create({
+            id: userId,
+            firstName: value.firstName,
+            lastName: value.lastName,
+            email: value.email,
+            password: hashedPassword,
+            role: value.role
+        });
+
+
+        res.status(201).json({
+            message: 'Der Benutzer wurde erfolgreich angelegt.'
         });
 
     } catch(error){
