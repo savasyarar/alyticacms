@@ -25,12 +25,17 @@ app.use(cors(corsOptions));
 import userRoutes from "./routes/User/userRoutes";
 import newsRoutes from "./routes/News/newsRoutes";
 import newsletterRoutes from "./routes/Newsletter/newsletterRoutes";
-
+import eventsRoutes from "./routes/Events/eventsRoutes";
+import membershipRoutes from "./routes/Membership/membershipRoutes";
+import contactRoutes from "./routes/Contact/contactRoutes";
 
 // use Routes
 app.use('/api', userRoutes);
 app.use('/api', newsRoutes);
 app.use('/api', newsletterRoutes);
+app.use('/api', eventsRoutes);
+app.use('/api', membershipRoutes);
+app.use('/api', contactRoutes);
 
 // server starts
 app.listen(PORT, () => {

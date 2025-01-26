@@ -203,7 +203,8 @@ export const handleGetAllNews = async(req: Request, res: Response): Promise<void
         }
 
         // Maximaleseitenanzahl
-        const totalPages = Math.ceil(totalCountAllNews / page);
+        const totalPages = Math.ceil(totalCountAllNews / limit);
+
         if(page > totalPages){
             sendErrorMessages(res, 404, 'Die angeforderte Seite existiert nicht.');
             return;

@@ -1,5 +1,6 @@
 import { Response } from "express";
 import { PutObjectCommand, S3Client, PutObjectCommandInput } from "@aws-sdk/client-s3";
+import sharp from "sharp";
 import s3Client from "./s3Client";
 
 // @ models
@@ -10,7 +11,6 @@ import {IUser} from "../interfaces/IUser";
 
 // @ types
 import { Role } from "../@types/user";
-import {Multer} from "multer";
 
 // Fehlermeldungen
 export const sendErrorMessages = (res: Response, status: number, message: string, errors?: string[]): void  => {
@@ -70,10 +70,18 @@ export const validFileUpload = async(file: Express.Multer.File | undefined, res:
 
     try {
 
+        // Bild skalieren
+        const sharpFileBuffer = await sharp(file.buffer).resize({
+            width: 1200,
+            height: 600,
+            fit: 'cover',
+            position: 'center'
+        }).toBuffer();
+
         const s3Params: PutObjectCommandInput = {
             Bucket: 'alytica',
             Key: `${Date.now()}_${file.originalname}`, // Erstelle einen eindeutigen Dateinamen
-            Body: file.buffer, // Dateiinhalt aus dem Memory Storage
+            Body: sharpFileBuffer, // Dateiinhalt aus dem Memory Storage
             ContentType: file.mimetype,
             ACL: 'public-read',
         };

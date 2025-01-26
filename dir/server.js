@@ -25,10 +25,16 @@ app.use((0, cors_1.default)(corsOptions));
 const userRoutes_1 = __importDefault(require("./routes/User/userRoutes"));
 const newsRoutes_1 = __importDefault(require("./routes/News/newsRoutes"));
 const newsletterRoutes_1 = __importDefault(require("./routes/Newsletter/newsletterRoutes"));
+const eventsRoutes_1 = __importDefault(require("./routes/Events/eventsRoutes"));
+const membershipRoutes_1 = __importDefault(require("./routes/Membership/membershipRoutes"));
+const contactRoutes_1 = __importDefault(require("./routes/Contact/contactRoutes"));
 // use Routes
 app.use('/api', userRoutes_1.default);
 app.use('/api', newsRoutes_1.default);
 app.use('/api', newsletterRoutes_1.default);
+app.use('/api', eventsRoutes_1.default);
+app.use('/api', membershipRoutes_1.default);
+app.use('/api', contactRoutes_1.default);
 // server starts
 app.listen(PORT, () => {
     mongoose_1.default.connect(process.env.MONGO_URI).then(() => {
