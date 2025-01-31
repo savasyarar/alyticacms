@@ -1,11 +1,12 @@
 import express from "express";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
+import { rateLimit } from "express-rate-limit";
 import cors from "cors";
 
 // @ settings
 const app = express();
-const PORT = process.env.PORT || 3080;
+const PORT = process.env.PORT || 3000;
 require('dotenv').config();
 
 // @ another settings
@@ -15,11 +16,22 @@ app.use(cookieParser());
 
 // @ cors settings
 let corsOptions = {
-    origin: ["http://localhost:3000"],
+    origin: ["https://dtgb.info"],
     credentials: true
 };
 
 app.use(cors(corsOptions));
+
+
+// @ rate limit
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 500,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+});
+
+app.use(limiter);
 
 // @ import routes
 import userRoutes from "./routes/User/userRoutes";
