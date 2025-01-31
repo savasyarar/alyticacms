@@ -16,8 +16,10 @@ app.use(cookieParser());
 
 // @ cors settings
 let corsOptions = {
-    origin: ["https://dtgb.info"],
-    credentials: true
+    origin: "https://www.dtgb.info",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 };
 
 app.use(cors(corsOptions));
